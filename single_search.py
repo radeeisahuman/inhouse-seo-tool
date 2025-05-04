@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import take_cred
 import time
+import pandas as pd
 
 def single_search():
     service = Service(ChromeDriverManager().install())
@@ -39,13 +40,30 @@ def single_search():
     input_field = modal.find_element(By.CLASS_NAME, "form-control")
 
     i = "y"
+    this_dict = {
+        "name": [],
+        "search_volume": []
+    }
     while i == "y":
         keyword = input("Enter the name of the things you want to search")
         input_field.send_keys(keyword + Keys.ENTER)
+        time.sleep(2)
+        rows = modal.find_elements(By.XPATH, ".//tbody/tr")
+        for row in rows:
+            try:
+                name_of_keyword = row.find_elements(By.TAG_NAME, "td")[0].text.strip()
+                search_volume_td = row.find_elements(By.TAG_NAME, "td")[1]
+                search_volume = search_volume_td.text.strip()
+                this_dict["name"].append(name_of_keyword)
+                this_dict["search_volume"].append(search_volume)
+            except Exception as e:
+                print("Error extracting search volume from a row:", str(e))
         print("Do you want to continue(y/n)")
         i = input()
         input_field.clear()
 
+    df = pd.DataFrame(this_dict)
+    df.to_csv("Previous Search.csv")
     time.sleep(2)
 
     driver.quit()

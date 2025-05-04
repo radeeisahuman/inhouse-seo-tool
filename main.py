@@ -1,7 +1,5 @@
-
 from single_search import single_search
 import tkinter as tk
-
 
 def main():    
     single_search()
